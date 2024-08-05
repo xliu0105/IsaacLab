@@ -58,8 +58,10 @@ def design_scene():
     cfg_light_distant.func("/World/lightDistant", cfg_light_distant, translation=(1, 0, 10))
 
     # spawn a cuboid
+    # IMPORTANT: 注意，各类模型配置类都是定义在omni.isaac.lab.sim.spawners.shapes下面的，但由于在omni.isaac.lab.sim的__init__.py中导入了很多子功能，因此可以直接在omni.isaac.lab.sim下访问
     cfg_cuboid = sim_utils.CuboidCfg(
-        size=[args_cli.size] * 3,
+        # 下面这一行用到了python的列表乘法操作符，[element] * n 会生成一个包含n个element的列表，如[0.9]*3 = [0.9, 0.9, 0.9]
+        size=[args_cli.size] * 3, # 使用之前传入AppLauncher的args_cli中的参数中的size，这是通过命令行传入的
         visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(1.0, 1.0, 1.0)),
     )
     # Spawn cuboid, altering translation on the z-axis to scale to its size

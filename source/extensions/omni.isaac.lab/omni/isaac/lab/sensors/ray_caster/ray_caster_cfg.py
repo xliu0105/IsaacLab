@@ -32,6 +32,7 @@ class RayCasterCfg(SensorBaseCfg):
 
     class_type: type = RayCaster
 
+    # 这个是射线要投射的mesh列表，目前只支持单个静态mesh
     mesh_prim_paths: list[str] = MISSING
     """The list of mesh primitive paths to ray cast against.
 

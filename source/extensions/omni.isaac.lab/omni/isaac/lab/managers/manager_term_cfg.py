@@ -136,6 +136,7 @@ class ObservationTermCfg(ManagerTermBaseCfg):
 
     noise: NoiseCfg | None = None
     """The noise to add to the observation. Defaults to None, in which case no noise is added."""
+    # 这个是对观测Term的观测值添加噪音，并且可以在观测组(Group)中对这个观测组的所有观测项的所有噪音的管理，即enable_corruption参数
 
     clip: tuple[float, float] | None = None
     """The clipping range for the observation after adding noise. Defaults to None,
@@ -151,6 +152,7 @@ class ObservationGroupCfg:
     """Configuration for an observation group."""
 
     concatenate_terms: bool = True
+    # 是否将观测值连接成一个张量，如果为true，则将观测值沿最后一个维度连接起来，否则将保持分开并作为字典返回
     """Whether to concatenate the observation terms in the group. Defaults to True.
 
     If true, the observation terms in the group are concatenated along the last dimension.
@@ -158,10 +160,12 @@ class ObservationGroupCfg:
     """
 
     enable_corruption: bool = False
+    # 是否对观测值进行噪声处理
     """Whether to enable corruption for the observation group. Defaults to False.
 
     If true, the observation terms in the group are corrupted by adding noise (if specified).
     Otherwise, no corruption is applied.
+    应该是只有当观测组中的观测Term设置了噪音项时，这个参数设为True才会产生noice作用，否则即使这里enable_corruption设为True了，也不会产生noice作用
     """
 
 
@@ -275,6 +279,7 @@ class TerminationTermCfg(ManagerTermBaseCfg):
     shape (num_envs,).
     """
 
+    # 这个终止时间是否是time_out的终止
     time_out: bool = False
     """Whether the termination term contributes towards episodic timeouts. Defaults to False.
 

@@ -59,6 +59,7 @@ def root_pos_w(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg = SceneEntityCfg(
     """Asset root position in the environment frame."""
     # extract the used quantities (to enable type-hinting)
     asset: RigidObject = env.scene[asset_cfg.name]
+    # asset.data.root_pos_w是机器人的根部在世界坐标系下的位置，env.scene.env_origins是当前环境在世界坐标系下的位置，所以返回的是机器人根部在当前环境坐标系下的位置
     return asset.data.root_pos_w - env.scene.env_origins
 
 

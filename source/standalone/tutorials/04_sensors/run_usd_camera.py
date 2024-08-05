@@ -67,7 +67,7 @@ import random
 import torch
 
 import omni.isaac.core.utils.prims as prim_utils
-import omni.replicator.core as rep
+import omni.replicator.core as rep # 为了保存相机输出，使用Omniverse Replicator中的基本写入类
 
 import omni.isaac.lab.sim as sim_utils
 from omni.isaac.lab.assets import RigidObject, RigidObjectCfg
@@ -171,7 +171,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene_entities: dict):
 
     # Create replicator writer
     output_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "output", "camera")
-    rep_writer = rep.BasicWriter(
+    rep_writer = rep.BasicWriter( # 创建Omniverse Replicator的基本写入类
         output_dir=output_dir,
         frame_padding=0,
         colorize_instance_id_segmentation=camera.cfg.colorize_instance_id_segmentation,
@@ -230,13 +230,15 @@ def run_simulator(sim: sim_utils.SimulationContext, scene_entities: dict):
             # Save images from camera at camera_index
             # note: BasicWriter only supports saving data in numpy format, so we need to convert the data to numpy.
             # tensordict allows easy indexing of tensors in the dictionary
+            # BasicWriter仅支持保存numpy格式的数据，因此我们需要将pytorch传感器数据转换为numpy。convert_dict_to_backend返回的是个字典
             single_cam_data = convert_dict_to_backend(camera.data.output[camera_index], backend="numpy")
 
             # Extract the other information
             single_cam_info = camera.data.info[camera_index]
 
             # Pack data back into replicator format to save them using its writer
-            if sim.get_version()[0] == 4:
+            # IMPORTANT: sim.get_version()是用来获取Omniverse的isaac sim版本的，其会返回一个三个元素的元祖，第一个元素是主版本号，我用的isaac sim 4.0.0
+            if sim.get_version()[0] == 4: # 这里的if判断就是为了判断是否用的是isaac sim 4.*.*版本
                 rep_output = {"annotators": {}}
                 for key, data, info in zip(single_cam_data.keys(), single_cam_data.values(), single_cam_info.values()):
                     if info is not None:

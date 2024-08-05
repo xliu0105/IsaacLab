@@ -8,6 +8,8 @@ from dataclasses import MISSING
 from omni.isaac.lab.utils.configclass import configclass
 
 
+# 在这个类中的注释提到，使用InteractiveScene添加实体对其添加顺序非常敏感，推荐的顺序是：
+# terrain, physics-related assets (articulations and rigid bodies), sensors and non-physics-related assets (lights)
 @configclass
 class InteractiveSceneCfg:
     """Configuration for the interactive scene.
@@ -69,7 +71,9 @@ class InteractiveSceneCfg:
 
     num_envs: int = MISSING
     """Number of environment instances handled by the scene."""
+    # 指定环境个数，也就是说在当前界面中有多少个环境(场景)，GPT说每个环境是相对独立的，但这些环境是运行在同一个仿真实例中的，因此如果发生碰撞，物理引擎会处理碰撞
 
+    # 每个环境之间的间距
     env_spacing: float = MISSING
     """Spacing between environments.
 

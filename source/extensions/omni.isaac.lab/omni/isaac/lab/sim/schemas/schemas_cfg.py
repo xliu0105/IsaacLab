@@ -29,9 +29,12 @@ class ArticulationRootPropertiesCfg:
     """Solver position iteration counts for the body."""
     sleep_threshold: float | None = None
     """Mass-normalized kinetic energy threshold below which an actor may go to sleep."""
+    # 质量归一化的动能阈值，低于此阈值的actor可能会进入睡眠状态
     stabilization_threshold: float | None = None
     """The mass-normalized kinetic energy threshold below which an articulation may participate in stabilization."""
+    # 质量归一化的动能阈值，低于此阈值的articulation可能会参与稳定化，意味着动能较低时，物理引擎会采取措施使其稳定，避免不必要的微小运动
     fix_root_link: bool | None = None
+    # 如果要将一个articulation的根节点固定在某个位置，可以设置这个属性为True
     """Whether to fix the root link of the articulation.
 
     * If set to None, the root link is not modified.
@@ -59,6 +62,7 @@ class RigidBodyPropertiesCfg:
     rigid_body_enabled: bool | None = None
     """Whether to enable or disable the rigid body."""
     kinematic_enabled: bool | None = None
+    # 如果kinematic_enabled设为true，则这个物体则会变成运动学物体，不受物理的影响
     """Determines whether the body is kinematic or not.
 
     A kinematic body is a body that is moved through animated poses or through user defined poses. The simulation

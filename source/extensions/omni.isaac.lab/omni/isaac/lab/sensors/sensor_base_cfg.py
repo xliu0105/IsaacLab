@@ -30,7 +30,7 @@ class SensorBaseCfg:
         Example: ``{ENV_REGEX_NS}/Robot/sensor`` will be replaced with ``/World/envs/env_.*/Robot/sensor``.
 
     """
-
+    # NOTE: 传感器的更新周期，单位是秒，如果是0.0，表示每一步都更新
     update_period: float = 0.0
     """Update period of the sensor buffers (in seconds). Defaults to 0.0 (update every step)."""
 

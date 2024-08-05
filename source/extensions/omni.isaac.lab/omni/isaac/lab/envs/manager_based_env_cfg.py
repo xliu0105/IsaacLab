@@ -38,9 +38,11 @@ class ManagerBasedEnvCfg:
 
     # simulation settings
     viewer: ViewerCfg = ViewerCfg()
+    # viwer应该是用来配置摄像机的相关参数（场景视口相机的配置）
     """Viewer configuration. Default is ViewerCfg()."""
 
     sim: SimulationCfg = SimulationCfg()
+    # sim是用来配置物理仿真的相关参数，如时间步长，重力等
     """Physics simulation configuration. Default is SimulationCfg()."""
 
     # ui settings
@@ -56,6 +58,7 @@ class ManagerBasedEnvCfg:
     """
 
     # general settings
+    # decimation参数应该是意味着，每多少个sim步长更新一次控制动作
     decimation: int = MISSING
     """Number of control action updates @ sim dt per policy dt.
 

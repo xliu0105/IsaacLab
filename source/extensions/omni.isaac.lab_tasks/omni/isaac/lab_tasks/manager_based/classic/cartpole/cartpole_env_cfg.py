@@ -29,7 +29,7 @@ from omni.isaac.lab_assets.cartpole import CARTPOLE_CFG  # isort:skip
 # Scene definition
 ##
 
-
+# NOTE: 配置cartpole的场景
 @configclass
 class CartpoleSceneCfg(InteractiveSceneCfg):
     """Configuration for a cart-pole scene."""
@@ -59,7 +59,8 @@ class CartpoleSceneCfg(InteractiveSceneCfg):
 # MDP settings
 ##
 
-
+# NOTE: 命令管理器是用来自动为代理生成要执行的动作命令的，如对四足机器人来说，命令可以是速度命令或位置命令等
+# 命令的配置类需要通过CommandTermCfg类来定义
 @configclass
 class CommandsCfg:
     """Command terms for the MDP."""
@@ -68,13 +69,14 @@ class CommandsCfg:
     null = mdp.NullCommandCfg()
 
 
+# NOTE: 配置Cartpole的动作配置文件
 @configclass
 class ActionsCfg:
     """Action specifications for the MDP."""
 
     joint_effort = mdp.JointEffortActionCfg(asset_name="robot", joint_names=["slider_to_cart"], scale=100.0)
 
-
+# NOTE: 配置观测配置文件
 @configclass
 class ObservationsCfg:
     """Observation specifications for the MDP."""
@@ -95,6 +97,7 @@ class ObservationsCfg:
     policy: PolicyCfg = PolicyCfg()
 
 
+# NOTE: 配置event事件配置文件
 @configclass
 class EventCfg:
     """Configuration for events."""
@@ -120,18 +123,19 @@ class EventCfg:
         },
     )
 
-
+# NOTE: 配置奖励配置文件
 @configclass
 class RewardsCfg:
     """Reward terms for the MDP."""
-
+    # IMPORTANT: 所有的奖励项都继承于RewardTermCfg类，这里是将RewardTermCfg类重命名为了RewTerm
+    # IMPORTANT: 注意看到，所有的奖励计算函数都以env: ManagerBasedRLEnv为参数，返回tensor类型的奖励值
     # (1) Constant running reward
     alive = RewTerm(func=mdp.is_alive, weight=1.0)
     # (2) Failure penalty
     terminating = RewTerm(func=mdp.is_terminated, weight=-2.0)
     # (3) Primary task: keep pole upright
     pole_pos = RewTerm(
-        func=mdp.joint_pos_target_l2,
+        func=mdp.joint_pos_target_l2, # NOTE: 如果奖励计算函数有除了env: ManagerBasedRLEnv之外的参数，就需要通过params传递
         weight=-1.0,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["cart_to_pole"]), "target": 0.0},
     )
@@ -148,20 +152,23 @@ class RewardsCfg:
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["cart_to_pole"])},
     )
 
-
+# NOTE: 配置终止条件配置文件
 @configclass
 class TerminationsCfg:
     """Termination terms for the MDP."""
-
+    # IMPORTANT: 所有的终止条件都继承于TerminationTermCfg类，这里是将TerminationTermCfg类重命名为DoneTerm
+    # IMPORTANT: 终止判断函数都是默认会传入env: ManagerBasedRLEnv。终止判断函数的返回值应该是torch boolean tensors of shape (num_envs,)
     # (1) Time out
     time_out = DoneTerm(func=mdp.time_out, time_out=True)
     # (2) Cart out of bounds
     cart_out_of_bounds = DoneTerm(
         func=mdp.joint_pos_out_of_manual_limit,
+        # 如果终止判断函数有除了env: ManagerBasedRLEnv之外的参数，就需要通过params传递
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["slider_to_cart"]), "bounds": (-3.0, 3.0)},
     )
 
-
+# NOTE: 定义课程配置文件，课程的意思是，在RL训练过程中往往从一个简单的任务开始，然后逐渐增加任务的难度
+# 课程的定义应该要通过CurriculumTermCfg配置类来定义
 @configclass
 class CurriculumCfg:
     """Configuration for the curriculum."""
@@ -173,7 +180,7 @@ class CurriculumCfg:
 # Environment configuration
 ##
 
-
+# IMPORTANT: 创建总的RL环境配置类，继承于ManagerBasedRLEnvCfg类
 @configclass
 class CartpoleEnvCfg(ManagerBasedRLEnvCfg):
     """Configuration for the locomotion velocity-tracking environment."""

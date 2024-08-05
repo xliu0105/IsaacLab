@@ -72,6 +72,7 @@ class RslRlVecEnvWrapper(VecEnv):
         else:
             self.num_actions = self.unwrapped.num_actions
         if hasattr(self.unwrapped, "observation_manager"):
+            # group_obs_dim返回的是一个dict，是所有观测组的观测tensor的shape，这里只取了名为policy的观测组的。num_obs是获取policy观测组的所有维度的相加(包括环境维度好像也加进去了)
             self.num_obs = self.unwrapped.observation_manager.group_obs_dim["policy"][0]
         else:
             self.num_obs = self.unwrapped.num_observations
@@ -80,6 +81,7 @@ class RslRlVecEnvWrapper(VecEnv):
             hasattr(self.unwrapped, "observation_manager")
             and "critic" in self.unwrapped.observation_manager.group_obs_dim
         ):
+            # IMPORTANT: 如果要使用非对称观察空间(asymmetric observation space)，需要在环境配置中的观测配置类中定义一个名为critic的观测组
             self.num_privileged_obs = self.unwrapped.observation_manager.group_obs_dim["critic"][0]
         elif hasattr(self.unwrapped, "num_states"):
             self.num_privileged_obs = self.unwrapped.num_states

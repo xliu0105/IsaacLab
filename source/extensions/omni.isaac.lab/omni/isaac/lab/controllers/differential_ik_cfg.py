@@ -19,6 +19,8 @@ class DifferentialIKControllerCfg:
     """The associated controller class."""
 
     command_type: Literal["position", "pose"] = MISSING
+    # command_type变量是一个字面类型，可以接受举出的两个值
+    # 如果是position，只能控制末端的位置，如果是pose，可以控制末端的位置和姿态
     """Type of task-space command to control the articulation's body.
 
     If "position", then the controller only controls the position of the articulation's body.
@@ -26,6 +28,7 @@ class DifferentialIKControllerCfg:
     """
 
     use_relative_mode: bool = False
+    # 如果设为true，则将input看做位置和姿态的delta change；否则看做绝对位置和姿态
     """Whether to use relative mode for the controller. Defaults to False.
 
     If True, then the controller treats the input command as a delta change in the position/pose.
@@ -33,6 +36,7 @@ class DifferentialIKControllerCfg:
     """
 
     ik_method: Literal["pinv", "svd", "trans", "dls"] = MISSING
+    # 计算雅可比矩阵的逆的方法
     """Method for computing inverse of Jacobian."""
 
     ik_params: dict[str, float] | None = None

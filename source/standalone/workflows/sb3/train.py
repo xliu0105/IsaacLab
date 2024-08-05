@@ -88,7 +88,7 @@ def main():
     # post-process agent configuration
     agent_cfg = process_sb3_cfg(agent_cfg)
     # read configurations about the agent-training
-    policy_arch = agent_cfg.pop("policy")
+    policy_arch = agent_cfg.pop("policy") # 某些参数就从agent_cfg中pop出来，因为在PPO类的构造中并没有这些参数，但这些参数会用到其他的地方
     n_timesteps = agent_cfg.pop("n_timesteps")
 
     # create isaac environment
@@ -103,14 +103,14 @@ def main():
         }
         print("[INFO] Recording videos during training.")
         print_dict(video_kwargs, nesting=4)
-        env = gym.wrappers.RecordVideo(env, **video_kwargs)
+        env = gym.wrappers.RecordVideo(env, **video_kwargs) # 调用函数可以传入一个字典，用**dict将字典解包成关键字参数传入函数
     # wrap around environment for stable baselines
-    env = Sb3VecEnvWrapper(env)
+    env = Sb3VecEnvWrapper(env) # IMPORTANT: 使用相应学习框架的包装器应该放在包装工作的最后一步
     # set the seed
     env.seed(seed=agent_cfg["seed"])
 
     if "normalize_input" in agent_cfg:
-        env = VecNormalize(
+        env = VecNormalize( # 如果在sb3的配置文件中定义了normalize_input，则对观测进行归一化
             env,
             training=True,
             norm_obs="normalize_input" in agent_cfg and agent_cfg.pop("normalize_input"),

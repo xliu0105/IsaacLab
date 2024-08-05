@@ -174,6 +174,7 @@ class InteractiveScene:
         if self._default_env_origins is None:
             self._default_env_origins = torch.tensor(env_origins, device=self.device, dtype=torch.float32)
 
+    # 如果调用了这个函数，在场景中会过滤不同环境之间的碰撞，同时设置global_prim_paths可以通过设置全局路径开启个别物体的相互碰撞
     def filter_collisions(self, global_prim_paths: list[str] | None = None):
         """Filter environments collisions.
 

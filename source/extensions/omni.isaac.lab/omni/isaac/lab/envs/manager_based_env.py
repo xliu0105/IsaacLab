@@ -245,7 +245,7 @@ class ManagerBasedEnv:
             self.seed(seed)
         # reset state of scene
         indices = torch.arange(self.num_envs, dtype=torch.int64, device=self.device)
-        self._reset_idx(indices)
+        self._reset_idx(indices) # 这里调用了_reset_idx()方法，这是这个类内定义的一个方法，用于按照指定的索引重置相应的环境
         # return observations
         return self.observation_manager.compute(), self.extras
 
@@ -272,6 +272,7 @@ class ManagerBasedEnv:
         is_rendering = self.sim.has_gui() or self.sim.has_rtx_sensors()
 
         # perform physics stepping
+        # IMPORTANT: 这里的for循环是根据decimation参数来更新控制动作的，这个参数是在环境管理配置类中设置的
         for _ in range(self.cfg.decimation):
             self._sim_step_counter += 1
             # set actions into buffers
@@ -293,6 +294,7 @@ class ManagerBasedEnv:
             self.event_manager.apply(mode="interval", dt=self.step_dt)
 
         # return observations and extras
+        # NOTE: 最后返回的是执行完decimation次action后的最新观测值
         return self.observation_manager.compute(), self.extras
 
     @staticmethod
@@ -337,6 +339,9 @@ class ManagerBasedEnv:
     Helper functions.
     """
 
+    # IMPORTANT: 这个_reset_idx函数是根据env_ids来reset对应的环境，上面的reset()是重置所有的环境，其在内部其实也是调用了这个函数
+    # 在重置后应该要重新获取观测值，因此如果是全部重置，reset()函数就会返回所有的新观测值，可以如果是部分重置，需要调用这个_reset_idx函数，这个默认不会返回观测值，
+    # 因此在调用这个函数后，需要调用self.observation_manager.compute()来获取新的观测值
     def _reset_idx(self, env_ids: Sequence[int]):
         """Reset environments based on specified indices.
 

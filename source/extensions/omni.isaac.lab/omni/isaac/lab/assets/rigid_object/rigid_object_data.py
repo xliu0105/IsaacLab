@@ -116,6 +116,7 @@ class RigidObjectData:
 
     @property
     def body_acc_w(self):
+        # 注意，这里计算的加速度就是用一个差分来计算的，因此还是相对来说有一定误差的。并且需要在仿真过程中持续不断执行这个函数，否则会有很大的累计误差
         """Acceleration of all bodies. Shape is (num_instances, 1, 6)."""
         if self._body_acc_w.timestamp < self._sim_timestamp:
             # note: we use finite differencing to compute acceleration

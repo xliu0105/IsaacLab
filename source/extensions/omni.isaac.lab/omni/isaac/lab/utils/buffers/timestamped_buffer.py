@@ -20,7 +20,7 @@ class TimestampedBuffer:
     useful when the data is expensive to compute or retrieve. For example usage, refer to the data classes in
     the :mod:`omni.isaac.lab.assets` module.
     """
-
+    # torch.tensor是一个可变对象
     data: torch.Tensor = None  # type: ignore
     """The data stored in the buffer. Default is None, indicating that the buffer is empty."""
 

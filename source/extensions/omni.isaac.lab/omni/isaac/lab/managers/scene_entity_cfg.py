@@ -14,6 +14,7 @@ from omni.isaac.lab.utils import configclass
 
 @configclass
 class SceneEntityCfg:
+    # 这个类用于指定在InteractiveScene中查询的场景实体名称，并将其传给管理器
     """Configuration for a scene entity that is used by the manager's term.
 
     This class is used to specify the name of the scene entity that is queried from the
@@ -92,6 +93,7 @@ class SceneEntityCfg:
     """
 
     def resolve(self, scene: InteractiveScene):
+        # 这个函数的作用应该是根据SceneEntityCfg类内设置的，在scene中查找实体名称，关节名称等并将其转化为索引
         """Resolves the scene entity and converts the joint and body names to indices.
 
         This function examines the scene entity from the :class:`InteractiveScene` and resolves the indices

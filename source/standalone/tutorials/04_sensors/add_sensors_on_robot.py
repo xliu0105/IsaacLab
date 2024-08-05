@@ -55,6 +55,7 @@ from omni.isaac.lab_assets.anymal import ANYMAL_C_CFG  # isort: skip
 
 @configclass
 class SensorsSceneCfg(InteractiveSceneCfg):
+    # IMPORTANT: 传感器也是定义在InteractiveSceneCfg的派生类中的，也是场景的一部分
     """Design the scene with sensors on the robot."""
 
     # ground plane
@@ -68,30 +69,38 @@ class SensorsSceneCfg(InteractiveSceneCfg):
     # robot
     robot: ArticulationCfg = ANYMAL_C_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
+    # IMPORTANT: 所有的传感器配置都继承于omni.isaac.lab.sensors中的传感器配置类，这些配置类都是SensorBaseCfg的派生类
+    # IMPORTANT: 可以看出，camera的prim_path是在base基础上又有了一个front_cam，而RayCasterCfg和ContactSensorCfg都是写到了robot现有的实体上，如base或者.*_FOOT
     # sensors
     camera = CameraCfg(
-        prim_path="{ENV_REGEX_NS}/Robot/base/front_cam",
-        update_period=0.1,
+        # IMPORTANT: 相机传感器会在场景中有一个对应的prim，因此会在指定的prim_path下生成一个相机的prim，而某些传感器会直接附加在现有的prim上，不会生成传感器对应的prim
+        prim_path="{ENV_REGEX_NS}/Robot/base/front_cam", # NOTE: 传感器的prim_path
+        update_period=0.1, # NOTE: 传感器的更新周期
         height=480,
         width=640,
-        data_types=["rgb", "distance_to_image_plane"],
+        data_types=["rgb", "distance_to_image_plane"], # camera的datatypes可以有多种类型，具体可以在camera.py文件中查看
         spawn=sim_utils.PinholeCameraCfg(
             focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 1.0e5)
-        ),
+        ), # IMPORTANT: 这里的spawn是一个PinholeCameraCfg的实例，生成相机的配置，主要是相机的具体参数
         offset=CameraCfg.OffsetCfg(pos=(0.510, 0.0, 0.015), rot=(0.5, -0.5, 0.5, -0.5), convention="ros"),
+        # NOTE: offset是相对于父prim的偏移量，这个offset的定义需要依赖于各个传感器的配置类内部的子类去定义，如CameraCfg.OffsetCfg或者RayCasterCfg.OffsetCfg
     )
     height_scanner = RayCasterCfg(
+        # IMPORTANT: 高度扫描传感器不会生成对应的prim，而是直接附加在现有的prim上
         prim_path="{ENV_REGEX_NS}/Robot/base",
         update_period=0.02,
         offset=RayCasterCfg.OffsetCfg(pos=(0.0, 0.0, 20.0)),
-        attach_yaw_only=True,
-        pattern_cfg=patterns.GridPatternCfg(resolution=0.1, size=[1.6, 1.0]),
-        debug_vis=True,
-        mesh_prim_paths=["/World/defaultGroundPlane"],
+        attach_yaw_only=True, # 只关注高度信息，因此不需要考虑机器人的滚动和俯仰，因此这个设为true
+        pattern_cfg=patterns.GridPatternCfg(resolution=0.1, size=[1.6, 1.0]), # 设置光线的属性
+        debug_vis=True, # 是否要可视化光纤击中网格的点
+        mesh_prim_paths=["/World/defaultGroundPlane"], # 射线要投射的mesh列表，目前只支持单个静态mesh
     )
+    # NOTE: 接触传感器依赖于PhysX的接触报告，因此需要在资产配置中将activate_contact_sensors设为true，即要在ArticulationCfg设置中将activate_contact_sensors设为true
+    # 接触传感器不会生成对应的prim，而是直接附加在现有的prim上，在这里是附加在机器人的脚上
     contact_forces = ContactSensorCfg(
-        prim_path="{ENV_REGEX_NS}/Robot/.*_FOOT", update_period=0.0, history_length=6, debug_vis=True
-    )
+        prim_path="{ENV_REGEX_NS}/Robot/.*_FOOT", update_period=0.0, history_length=6, debug_vis=True,
+        filter_prim_paths_expr = ["/World/defaultGroundPlane"]
+    )# 储存历史信息
 
 
 def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
@@ -150,6 +159,8 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         print("-------------------------------")
         print(scene["contact_forces"])
         print("Received max contact force of: ", torch.max(scene["contact_forces"].data.net_forces_w).item())
+        # print("-------------------------------",scene["contact_forces"].data.net_forces_w.shape)
+        # print("--------------------------------",scene["contact_forces"].data.force_matrix_w.shape)
 
 
 def main():
@@ -164,7 +175,7 @@ def main():
     scene_cfg = SensorsSceneCfg(num_envs=args_cli.num_envs, env_spacing=2.0)
     scene = InteractiveScene(scene_cfg)
     # Play the simulator
-    sim.reset()
+    sim.reset() # 仅当播放模拟的时候才会初始化传感器的缓冲区和物理句柄，因此调用sim.reset()是很重要的
     # Now we are ready!
     print("[INFO]: Setup complete...")
     # Run the simulator

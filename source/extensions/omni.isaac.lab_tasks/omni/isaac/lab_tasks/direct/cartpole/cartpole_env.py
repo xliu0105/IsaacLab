@@ -21,6 +21,7 @@ from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.utils.math import sample_uniform
 
 
+# IMPORTANT: 直接工作流不适用Action和Observation管理器，因此任务配置需要定义环境的动作和观察数
 @configclass
 class CartpoleEnvCfg(DirectRLEnvCfg):
     # env
@@ -55,10 +56,10 @@ class CartpoleEnvCfg(DirectRLEnvCfg):
 
 
 class CartpoleEnv(DirectRLEnv):
-    cfg: CartpoleEnvCfg
+    cfg: CartpoleEnvCfg # 这种表达方法仅仅是一个注解，而不是真正的类型声明
 
     def __init__(self, cfg: CartpoleEnvCfg, render_mode: str | None = None, **kwargs):
-        super().__init__(cfg, render_mode, **kwargs)
+        super().__init__(cfg, render_mode, **kwargs) # 调用父类的构造函数
 
         self._cart_dof_idx, _ = self.cartpole.find_joints(self.cfg.cart_dof_name)
         self._pole_dof_idx, _ = self.cartpole.find_joints(self.cfg.pole_dof_name)
@@ -67,22 +68,30 @@ class CartpoleEnv(DirectRLEnv):
         self.joint_pos = self.cartpole.data.joint_pos
         self.joint_vel = self.cartpole.data.joint_vel
 
+    # 创建场景
+    # NOTE: 创建场景的函数必须名为_setup_scene(self)，因为在父类中这个名称已经被定义为抽象方法了
+    # _setup_scene会在父类的构造函数中被调用
     def _setup_scene(self):
-        self.cartpole = Articulation(self.cfg.robot_cfg)
+        self.cartpole = Articulation(self.cfg.robot_cfg) # 创建一个Articulation对象
         # add ground plane
-        spawn_ground_plane(prim_path="/World/ground", cfg=GroundPlaneCfg())
+        spawn_ground_plane(prim_path="/World/ground", cfg=GroundPlaneCfg()) # 使用isaac lab提供的spawn_ground_plane函数创建一个地面
         # clone, filter, and replicate
-        self.scene.clone_environments(copy_from_source=False)
-        self.scene.filter_collisions(global_prim_paths=[])
+        self.scene.clone_environments(copy_from_source=False) # 在父类的构造中定义了self.scene
+        self.scene.filter_collisions(global_prim_paths=[]) # NOTE: 设置不同环境之间的碰撞被过滤
         # add articultion to scene
         self.scene.articulations["cartpole"] = self.cartpole
         # add lights
         light_cfg = sim_utils.DomeLightCfg(intensity=2000.0, color=(0.75, 0.75, 0.75))
         light_cfg.func("/World/Light", light_cfg)
 
+    # action的step之前的预处理，在父类中是抽象方法，必须要重写实现
+    # 这个预处理在每次step前只会被调用一次
     def _pre_physics_step(self, actions: torch.Tensor) -> None:
         self.actions = self.action_scale * actions.clone()
 
+    # IMPORTANT: _apply_action函数是要将动作写到Articulation对象的buffer中，用的就是set_joint_effort_target函数，
+    # 执行这一步之后还要有一个scene.write_data_to_sim()的操作才算是把action动作写进仿真器中，这个操作在父类的step函数已经实现了
+    # 这个函数在仿真中会被调用decimation次，因为每一次step意味着在仿真中执行decimation次物理步骤，因此这一步的动作会被执行decimation次
     def _apply_action(self) -> None:
         self.cartpole.set_joint_effort_target(self.actions, joint_ids=self._cart_dof_idx)
 
@@ -96,9 +105,10 @@ class CartpoleEnv(DirectRLEnv):
             ),
             dim=-1,
         )
-        observations = {"policy": obs}
+        observations = {"policy": obs} # NOTE: 将观测值存在字典中，键必须是"policy"，因为在父类中已经用这个键来提取观测值了
         return observations
 
+    # NOTE: 计算奖励的函数必须名为_get_rewards(self)，因为在父类中这个名称已经被定义为抽象方法了
     def _get_rewards(self) -> torch.Tensor:
         total_reward = compute_rewards(
             self.cfg.rew_scale_alive,
@@ -123,10 +133,11 @@ class CartpoleEnv(DirectRLEnv):
         out_of_bounds = out_of_bounds | torch.any(torch.abs(self.joint_pos[:, self._pole_dof_idx]) > math.pi / 2, dim=1)
         return out_of_bounds, time_out
 
+    # _reset_idx其实是不必要重写的，因为父类中的_reset_idx函数已经实现了对环境的重置，但这里是为了在reset的时候能够设置机器人的初始状态
     def _reset_idx(self, env_ids: Sequence[int] | None):
         if env_ids is None:
             env_ids = self.cartpole._ALL_INDICES
-        super()._reset_idx(env_ids)
+        super()._reset_idx(env_ids) # 调用了父类的_reset_idx函数
 
         joint_pos = self.cartpole.data.default_joint_pos[env_ids]
         joint_pos[:, self._pole_dof_idx] += sample_uniform(

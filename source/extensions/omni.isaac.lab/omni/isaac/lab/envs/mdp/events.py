@@ -788,7 +788,7 @@ def reset_joints_by_scale(
 
 
 def reset_joints_by_offset(
-    env: ManagerBasedEnv,
+    env: ManagerBasedEnv, # 这个env就是环境管理器
     env_ids: torch.Tensor,
     position_range: tuple[float, float],
     velocity_range: tuple[float, float],

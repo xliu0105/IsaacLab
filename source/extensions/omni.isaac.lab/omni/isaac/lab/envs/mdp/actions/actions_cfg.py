@@ -30,7 +30,7 @@ class JointActionCfg(ActionTermCfg):
     offset: float | dict[str, float] = 0.0
     """Offset factor for the action (float or dict of regex expressions). Defaults to 0.0."""
 
-
+# jointpositionaction的输出就是scale*action+offset，action是actor输出的动作数值
 @configclass
 class JointPositionActionCfg(JointActionCfg):
     """Configuration for the joint position action term.

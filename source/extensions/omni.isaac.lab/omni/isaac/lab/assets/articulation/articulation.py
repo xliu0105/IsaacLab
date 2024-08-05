@@ -101,7 +101,7 @@ class Articulation(RigidObject):
         Args:
             cfg: A configuration instance.
         """
-        super().__init__(cfg)
+        super().__init__(cfg) # super()是用于调用父类(超类)的一个方法，这里表示调用其父类的构造函数
 
     """
     Properties

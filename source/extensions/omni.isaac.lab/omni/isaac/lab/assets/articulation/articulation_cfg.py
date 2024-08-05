@@ -12,7 +12,7 @@ from ..rigid_object import RigidObjectCfg
 from .articulation import Articulation
 
 
-@configclass
+@configclass # NOTE: @configclass修饰器用于将类转化为配置类，可以理解为自动生成初始化方法(__init__)
 class ArticulationCfg(RigidObjectCfg):
     """Configuration parameters for an articulation."""
 

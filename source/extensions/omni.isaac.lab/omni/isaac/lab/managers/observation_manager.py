@@ -41,6 +41,7 @@ class ObservationManager(ManagerBase):
         super().__init__(cfg, env)
         # compute combined vector for obs group
         self._group_obs_dim: dict[str, tuple[int, ...]] = dict()
+        # 下面这个for循环应该是将每个观测组的数据的所有维度相加，得到一个总的维度，并按照观测组的名字存储在一个dict中
         for group_name, group_term_dims in self._group_obs_term_dim.items():
             term_dims = [torch.tensor(dims, device="cpu") for dims in group_term_dims]
             self._group_obs_dim[group_name] = tuple(torch.sum(torch.stack(term_dims, dim=0), dim=0).tolist())
