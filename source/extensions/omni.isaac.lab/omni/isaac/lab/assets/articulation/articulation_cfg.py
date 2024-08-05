@@ -12,7 +12,7 @@ from ..asset_base_cfg import AssetBaseCfg
 from .articulation import Articulation
 
 
-@configclass # NOTE: @configclass修饰器用于将类转化为配置类，可以理解为自动生成初始化方法(__init__)
+@configclass  # NOTE: @configclass修饰器用于将类转化为配置类，可以理解为自动生成初始化方法(__init__)
 class ArticulationCfg(AssetBaseCfg):
     """Configuration parameters for an articulation."""
 

@@ -56,10 +56,10 @@ class CartpoleEnvCfg(DirectRLEnvCfg):
 
 
 class CartpoleEnv(DirectRLEnv):
-    cfg: CartpoleEnvCfg # 这种表达方法仅仅是一个注解，而不是真正的类型声明
+    cfg: CartpoleEnvCfg  # 这种表达方法仅仅是一个注解，而不是真正的类型声明
 
     def __init__(self, cfg: CartpoleEnvCfg, render_mode: str | None = None, **kwargs):
-        super().__init__(cfg, render_mode, **kwargs) # 调用父类的构造函数
+        super().__init__(cfg, render_mode, **kwargs)  # 调用父类的构造函数
 
         self._cart_dof_idx, _ = self.cartpole.find_joints(self.cfg.cart_dof_name)
         self._pole_dof_idx, _ = self.cartpole.find_joints(self.cfg.pole_dof_name)
@@ -72,12 +72,12 @@ class CartpoleEnv(DirectRLEnv):
     # NOTE: 创建场景的函数必须名为_setup_scene(self)，因为在父类中这个名称已经被定义为抽象方法了
     # _setup_scene会在父类的构造函数中被调用
     def _setup_scene(self):
-        self.cartpole = Articulation(self.cfg.robot_cfg) # 创建一个Articulation对象
+        self.cartpole = Articulation(self.cfg.robot_cfg)  # 创建一个Articulation对象
         # add ground plane
-        spawn_ground_plane(prim_path="/World/ground", cfg=GroundPlaneCfg()) # 使用isaac lab提供的spawn_ground_plane函数创建一个地面
+        spawn_ground_plane(prim_path="/World/ground", cfg=GroundPlaneCfg())  # 使用isaac lab提供的spawn_ground_plane函数创建一个地面
         # clone, filter, and replicate
-        self.scene.clone_environments(copy_from_source=False) # 在父类的构造中定义了self.scene
-        self.scene.filter_collisions(global_prim_paths=[]) # NOTE: 设置不同环境之间的碰撞被过滤
+        self.scene.clone_environments(copy_from_source=False)  # 在父类的构造中定义了self.scene
+        self.scene.filter_collisions(global_prim_paths=[])  # NOTE: 设置不同环境之间的碰撞被过滤
         # add articultion to scene
         self.scene.articulations["cartpole"] = self.cartpole
         # add lights
@@ -105,7 +105,7 @@ class CartpoleEnv(DirectRLEnv):
             ),
             dim=-1,
         )
-        observations = {"policy": obs} # NOTE: 将观测值存在字典中，键必须是"policy"，因为在父类中已经用这个键来提取观测值了
+        observations = {"policy": obs}  # NOTE: 将观测值存在字典中，键必须是"policy"，因为在父类中已经用这个键来提取观测值了
         return observations
 
     # NOTE: 计算奖励的函数必须名为_get_rewards(self)，因为在父类中这个名称已经被定义为抽象方法了
@@ -137,7 +137,7 @@ class CartpoleEnv(DirectRLEnv):
     def _reset_idx(self, env_ids: Sequence[int] | None):
         if env_ids is None:
             env_ids = self.cartpole._ALL_INDICES
-        super()._reset_idx(env_ids) # 调用了父类的_reset_idx函数
+        super()._reset_idx(env_ids)  # 调用了父类的_reset_idx函数
 
         joint_pos = self.cartpole.data.default_joint_pos[env_ids]
         joint_pos[:, self._pole_dof_idx] += sample_uniform(

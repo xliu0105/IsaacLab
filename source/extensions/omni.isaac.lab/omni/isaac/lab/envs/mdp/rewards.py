@@ -30,7 +30,7 @@ General.
 
 def is_alive(env: ManagerBasedRLEnv) -> torch.Tensor:
     """Reward for being alive."""
-    return (~env.termination_manager.terminated).float() # ~符号表示按位取反操作
+    return (~env.termination_manager.terminated).float()  # ~符号表示按位取反操作
 
 
 def is_terminated(env: ManagerBasedRLEnv) -> torch.Tensor:

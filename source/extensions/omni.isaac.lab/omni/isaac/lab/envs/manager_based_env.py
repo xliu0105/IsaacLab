@@ -239,7 +239,7 @@ class ManagerBasedEnv:
             self.seed(seed)
         # reset state of scene
         indices = torch.arange(self.num_envs, dtype=torch.int64, device=self.device)
-        self._reset_idx(indices) # 这里调用了_reset_idx()方法，这是这个类内定义的一个方法，用于按照指定的索引重置相应的环境
+        self._reset_idx(indices)  # 这里调用了_reset_idx()方法，这是这个类内定义的一个方法，用于按照指定的索引重置相应的环境
         # return observations
         return self.observation_manager.compute(), self.extras
 

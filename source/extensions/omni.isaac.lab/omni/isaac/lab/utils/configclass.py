@@ -96,10 +96,10 @@ def configclass(cls, **kwargs):
     # add helper functions for dictionary conversion
     setattr(cls, "to_dict", _class_to_dict)
     setattr(cls, "from_dict", _update_class_from_dict)
-    setattr(cls, "replace", _replace_class_with_kwargs) # NOTE: 这里给cls添加了replace方法，这个方法是用来创建现有实例的副本，是基于dataclasses的replace方法的一个封装
+    setattr(cls, "replace", _replace_class_with_kwargs)  # NOTE: 这里给cls添加了replace方法，这个方法是用来创建现有实例的副本，是基于dataclasses的replace方法的一个封装
     setattr(cls, "copy", _copy_class)
     # wrap around dataclass
-    cls = dataclass(cls, **kwargs) # IMPORTANT: 这里调用了dataclass方法，实际上这个函数是在dataclass基础上进行了一些额外的操作，生成基于dataclass的修饰器
+    cls = dataclass(cls, **kwargs)  # IMPORTANT: 这里调用了dataclass方法，实际上这个函数是在dataclass基础上进行了一些额外的操作，生成基于dataclass的修饰器
     # return wrapped class
     return cls
 

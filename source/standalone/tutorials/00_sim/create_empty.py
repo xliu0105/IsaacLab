@@ -38,10 +38,10 @@ def main():
     """Main function."""
 
     # Initialize the simulation context
-    sim_cfg = SimulationCfg(dt=0.01)  #设置物理和渲染时间步长为0.01s，通过SimulationCfg创建对象
-    sim = SimulationContext(sim_cfg)  #通过上一行代码创建的SimulationCfg对象，使用SimulationContext创建模拟上下文实例
+    sim_cfg = SimulationCfg(dt=0.01)  # 设置物理和渲染时间步长为0.01s，通过SimulationCfg创建对象
+    sim = SimulationContext(sim_cfg)  # 通过上一行代码创建的SimulationCfg对象，使用SimulationContext创建模拟上下文实例
     # Set main camera
-    sim.set_camera_view([2.5, 2.5, 2.5], [0.0, 0.0, 0.0]) #设置主相机
+    sim.set_camera_view([2.5, 2.5, 2.5], [0.0, 0.0, 0.0])  # 设置主相机
 
     # Play the simulator
     sim.reset()  # 播放时间轴并初始化模拟器中的物理处理。在第一次步进模拟器之前必须调用此方法，否则模拟器不能正确初始化。注意区分其和sim.SimulationContext.play()方法，这个只播放时间轴但不初始化
