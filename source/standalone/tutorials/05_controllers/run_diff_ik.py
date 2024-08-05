@@ -108,7 +108,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
     goal_marker = VisualizationMarkers(frame_marker_cfg.replace(prim_path="/Visuals/ee_goal"))
 
     # Define goals for the arm
-    ee_goals = [ # 设置机械臂末端的目标位置和姿态，每一行代表一个目标
+    ee_goals = [  # 设置机械臂末端的目标位置和姿态，每一行代表一个目标
         [0.5, 0.5, 0.7, 0.707, 0, 0.707, 0],
         [0.5, -0.4, 0.6, 0.707, 0.707, 0.0, 0.0],
         [0.5, 0, 0.5, 0.0, 1.0, 0.0, 0.0],
@@ -159,8 +159,8 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
             ik_commands[:] = ee_goals[current_goal_idx]
             joint_pos_des = joint_pos[:, robot_entity_cfg.joint_ids].clone()
             # reset controller
-            diff_ik_controller.reset() # 重置reset是必要的，因为控制器内部有一些状态需要重置
-            diff_ik_controller.set_command(ik_commands) # set_command方法用于设置控制器的目标位置和姿态，传入的是一个(N,7)的数据
+            diff_ik_controller.reset()  # 重置reset是必要的，因为控制器内部有一些状态需要重置
+            diff_ik_controller.set_command(ik_commands)  # set_command方法用于设置控制器的目标位置和姿态，传入的是一个(N,7)的数据
             # change goal
             current_goal_idx = (current_goal_idx + 1) % len(ee_goals)
         else:
@@ -173,7 +173,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
             # body_state_w会返回在世界坐标系下某个body的位置和姿态，而root_state_w会返回在世界坐标系下根部的位置和姿态，两者计算可以算出末端在根部坐标系下的位置和姿态
             joint_pos = robot.data.joint_pos[:, robot_entity_cfg.joint_ids]
             # compute frame in root frame
-            ee_pos_b, ee_quat_b = subtract_frame_transforms( # 这个函数就是用来计算末端在根部坐标系下的位置和姿态
+            ee_pos_b, ee_quat_b = subtract_frame_transforms(  # 这个函数就是用来计算末端在根部坐标系下的位置和姿态
                 root_pose_w[:, 0:3], root_pose_w[:, 3:7], ee_pose_w[:, 0:3], ee_pose_w[:, 3:7]
             )
             # compute the joint commands

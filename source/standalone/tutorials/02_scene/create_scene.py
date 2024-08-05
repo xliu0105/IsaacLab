@@ -77,7 +77,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
     """Runs the simulation loop."""
     # Extract scene entities
     # note: we only do this here for readability.
-    robot = scene["cartpole"] # IMPORTANT: 可以使用InteractiveScene对象从字典中获取场景元素
+    robot = scene["cartpole"]  # IMPORTANT: 可以使用InteractiveScene对象从字典中获取场景元素
     # Define simulation stepping
     sim_dt = sim.get_physics_dt()
     count = 0
@@ -101,14 +101,14 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
             # write_joint_state_to_sim有四个参数，前两个是关节位置和速度，后两个是joint_ids和env_ids，用来指定要写入的关节和环境索引
             robot.write_joint_state_to_sim(joint_pos, joint_vel)
             # clear internal buffers
-            scene.reset() # IMPORTANT: reset函数有参数为Sequence[int]类型，用于指定要重置的环境索引，如果不传参数，则默认重置所有环境
+            scene.reset()  # IMPORTANT: reset函数有参数为Sequence[int]类型，用于指定要重置的环境索引，如果不传参数，则默认重置所有环境
             # IMPORTANT: 如果要在scene.reset()部分环境，则在write_root_state_to_sim和write_joint_state_to_sim中也要指定相同的环境索引以及对应shape的对局
             print("[INFO]: Resetting robot state...")
         # Apply random action
         # -- generate random joint efforts
         efforts = torch.randn_like(robot.data.joint_pos) * 5.0
         # -- apply action to the robot
-        robot.set_joint_effort_target(efforts) # 设置关节力矩是针对Articulation对象的方法
+        robot.set_joint_effort_target(efforts)  # 设置关节力矩是针对Articulation对象的方法
         # -- write data to sim
         scene.write_data_to_sim()
         # Perform step
@@ -130,7 +130,7 @@ def main():
     # 根据上面自定义的继承于InteractiveSceneCfg的CartpoleSceneCfg配置类创建场景
     # InteractiveSceneCfg配置类内有参数，如num_envs指定了环境副本数量，env_spacing指定了环境之间的间距
     scene_cfg = CartpoleSceneCfg(num_envs=args_cli.num_envs, env_spacing=2.0)
-    scene = InteractiveScene(scene_cfg) # 将配置类传给InteractiveScene以创建场景
+    scene = InteractiveScene(scene_cfg)  # 将配置类传给InteractiveScene以创建场景
     # Play the simulator
     sim.reset()
     # Now we are ready!

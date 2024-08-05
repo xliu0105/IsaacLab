@@ -37,10 +37,10 @@ from omni.isaac.lab_tasks.manager_based.classic.cartpole.cartpole_env_cfg import
 def main():
     """Main function."""
     # create environment configuration
-    env_cfg = CartpoleEnvCfg() # 实例化RL环境配置类
+    env_cfg = CartpoleEnvCfg()  # 实例化RL环境配置类
     env_cfg.scene.num_envs = args_cli.num_envs
     # setup RL environment
-    env = ManagerBasedRLEnv(cfg=env_cfg) # 实例化RL环境
+    env = ManagerBasedRLEnv(cfg=env_cfg)  # 实例化RL环境
 
     # simulate physics
     count = 0
@@ -49,13 +49,13 @@ def main():
             # reset
             if count % 300 == 0:
                 count = 0
-                env.reset() # reset会重置所有环境，并返回初始观测
+                env.reset()  # reset会重置所有环境，并返回初始观测
                 print("-" * 80)
                 print("[INFO]: Resetting environment...")
             # sample random actions
             joint_efforts = torch.randn_like(env.action_manager.action)
             # step the environment
-            obs, rew, terminated, truncated, info = env.step(joint_efforts) # IMPORTANT: 如果是用的RL的环境管理，每step一次会返回5个内容，和OpenAI gym类似
+            obs, rew, terminated, truncated, info = env.step(joint_efforts)  # IMPORTANT: 如果是用的RL的环境管理，每step一次会返回5个内容，和OpenAI gym类似
             # print current orientation of pole
             print("[Env 0]: Pole joint: ", obs["policy"][0][1].item())
             # update counter
