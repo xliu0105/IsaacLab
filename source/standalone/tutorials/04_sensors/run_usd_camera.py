@@ -237,21 +237,16 @@ def run_simulator(sim: sim_utils.SimulationContext, scene_entities: dict):
             single_cam_info = camera.data.info[camera_index]
 
             # Pack data back into replicator format to save them using its writer
-            # IMPORTANT: sim.get_version()是用来获取Omniverse的isaac sim版本的，其会返回一个三个元素的元祖，第一个元素是主版本号，我用的isaac sim 4.0.0
-            if sim.get_version()[0] == 4: # 这里的if判断就是为了判断是否用的是isaac sim 4.*.*版本
-                rep_output = {"annotators": {}}
-                for key, data, info in zip(single_cam_data.keys(), single_cam_data.values(), single_cam_info.values()):
-                    if info is not None:
-                        rep_output["annotators"][key] = {"render_product": {"data": data, **info}}
-                    else:
-                        rep_output["annotators"][key] = {"render_product": {"data": data}}
-            else:
-                rep_output = dict()
-                for key, data, info in zip(single_cam_data.keys(), single_cam_data.values(), single_cam_info.values()):
-                    if info is not None:
-                        rep_output[key] = {"data": data, "info": info}
-                    else:
-                        rep_output[key] = data
+            # 早期版本的isaac lab还会判断使用的isaac sim的版本，后来的isaaclab版本已经抛弃了isaac sim4.0.0之前的版本，因此就不需要判断isaac sim的版本了
+            # sim.get_version()是用来获取Omniverse的isaac sim版本的，其会返回一个三个元素的元祖，第一个元素是主版本号，我用的isaac sim 4.0.0
+            # 可以用if sim.get_version()[0] == 4:来判断是否用的是isaac sim 4.*.*版本
+            rep_output = {"annotators": {}}
+            for key, data, info in zip(single_cam_data.keys(), single_cam_data.values(), single_cam_info.values()):
+                if info is not None:
+                    rep_output["annotators"][key] = {"render_product": {"data": data, **info}}
+                else:
+                    rep_output["annotators"][key] = {"render_product": {"data": data}}
+            
             # Save images
             # Note: We need to provide On-time data for Replicator to save the images.
             rep_output["trigger_outputs"] = {"on_time": camera.frame[camera_index]}
