@@ -63,6 +63,9 @@ class JointAction(ActionTerm):
             f"Resolved joint names for the action term {self.__class__.__name__}:"
             f" {self._joint_names} [{self._joint_ids}]"
         )
+        # NOTE: 后面的一行代码是用来知道action施加的关节顺序的
+
+        print("JointAction:--------self._joint_ids:", self._joint_ids, "------self._joint_names:", self._joint_names)
 
         # Avoid indexing across all joints for efficiency
         if self._num_joints == self._asset.num_joints:

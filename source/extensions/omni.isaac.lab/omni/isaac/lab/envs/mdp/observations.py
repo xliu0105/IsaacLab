@@ -187,7 +187,7 @@ def body_incoming_wrench(env: ManagerBasedEnv, asset_cfg: SceneEntityCfg) -> tor
 Actions.
 """
 
-
+# 这里的last_action是获取上一次的action，注意，是actor网络输出的action，而不是传入给环境经过缩放+偏移后的action
 def last_action(env: ManagerBasedEnv, action_name: str | None = None) -> torch.Tensor:
     """The last input action to the environment.
 

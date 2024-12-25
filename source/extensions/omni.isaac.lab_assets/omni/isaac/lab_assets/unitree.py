@@ -80,7 +80,7 @@ UNITREE_A1_CFG = ArticulationCfg(
     ),
     soft_joint_pos_limit_factor=0.9,
     actuators={
-        "base_legs": DCMotorCfg(
+        "base_legs": DCMotorCfg(  # NOTE: 这里用的是DCMotor，这个定义是MIT计算力矩的形式，tau = P * pos_error + D * vel_error + effort
             joint_names_expr=[".*_hip_joint", ".*_thigh_joint", ".*_calf_joint"],
             effort_limit=33.5,
             saturation_effort=33.5,

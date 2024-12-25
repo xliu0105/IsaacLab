@@ -41,6 +41,7 @@ class CartpoleEnvCfg(DirectRLEnvCfg):
     pole_dof_name = "cart_to_pole"
 
     # scene
+    # 注意，以下这一个是创建场景scene的配置类，这个配置类中没有定义robot属性，因此需要在_setup_scene函数中手动向scene中添加robot
     scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=4.0, replicate_physics=True)
 
     # reset
@@ -72,15 +73,22 @@ class CartpoleEnv(DirectRLEnv):
     # NOTE: 创建场景的函数必须名为_setup_scene(self)，因为在父类中这个名称已经被定义为抽象方法了
     # _setup_scene会在父类的构造函数中被调用
     def _setup_scene(self):
-        self.cartpole = Articulation(self.cfg.robot_cfg)  # 创建一个Articulation对象
-        # add ground plane
+        self.cartpole = Articulation(self.cfg.robot_cfg)  # 创建一个Articulation对象，这句话会直接在仿真环境中创建一个机器人
+        # # add ground plane
         spawn_ground_plane(prim_path="/World/ground", cfg=GroundPlaneCfg())  # 使用isaac lab提供的spawn_ground_plane函数创建一个地面
-        # clone, filter, and replicate
+        # # clone, filter, and replicate
         self.scene.clone_environments(copy_from_source=False)  # 在父类的构造中定义了self.scene
         self.scene.filter_collisions(global_prim_paths=[])  # NOTE: 设置不同环境之间的碰撞被过滤
-        # add articultion to scene
-        self.scene.articulations["cartpole"] = self.cartpole
-        # add lights
+        # # add articultion to scene
+        """
+            注意，场景(scene)是已通过InteractiveSceneCfg配置, 由InteractiveScene类创建的.
+            如果在InteractiveSceneCfg配置类中设置了robot, 如自定义了类继承于InteractiveSceneCfg, 并且其中定义了如
+                robot: ArticulationCfg = CARTPOLE_CFG.replace(prim_path="/World/envs/env_.*/Robot")
+            则创建的scene对象中的articulations属性(字典)中会有一个名为"robot"的Articulation对象
+            但是在这个文件中, 并不是这么做的, InteractiveSceneCfg中并没有定义robot属性(Articulation), 因此需要通过下面的一行代码手动给scene添加robot
+        """
+        self.scene.articulations["cartpole"] = self.cartpole  # 手动向scene中添加robot(articulation)，如果没有向场景中添加robot，那么就无法控制并观察这个robot，但在仿真环境中这个robot是存在的
+        # # add lights
         light_cfg = sim_utils.DomeLightCfg(intensity=2000.0, color=(0.75, 0.75, 0.75))
         light_cfg.func("/World/Light", light_cfg)
 
