@@ -48,28 +48,14 @@ class CartpoleSceneCfg(InteractiveSceneCfg):
         prim_path="/World/DomeLight",
         spawn=sim_utils.DomeLightCfg(color=(0.9, 0.9, 0.9), intensity=500.0),
     )
-    distant_light = AssetBaseCfg(
-        prim_path="/World/DistantLight",
-        spawn=sim_utils.DistantLightCfg(color=(0.9, 0.9, 0.9), intensity=2500.0),
-        init_state=AssetBaseCfg.InitialStateCfg(rot=(0.738, 0.477, 0.477, 0.0)),
-    )
 
 
 ##
 # MDP settings
 ##
 
-# NOTE: 命令管理器是用来自动为代理生成要执行的动作命令的，如对四足机器人来说，命令可以是速度命令或位置命令等
-# 命令的配置类需要通过CommandTermCfg类来定义
-@configclass
-class CommandsCfg:
-    """Command terms for the MDP."""
-
-    # no commands for this MDP
-    null = mdp.NullCommandCfg()
 
 
-# NOTE: 配置Cartpole的动作配置文件
 @configclass
 class ActionsCfg:
     """Action specifications for the MDP."""
@@ -167,14 +153,6 @@ class TerminationsCfg:
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["slider_to_cart"]), "bounds": (-3.0, 3.0)},
     )
 
-# NOTE: 定义课程配置文件，课程的意思是，在RL训练过程中往往从一个简单的任务开始，然后逐渐增加任务的难度
-# 课程的定义应该要通过CurriculumTermCfg配置类来定义
-@configclass
-class CurriculumCfg:
-    """Configuration for the curriculum."""
-
-    pass
-
 
 ##
 # Environment configuration
@@ -183,7 +161,7 @@ class CurriculumCfg:
 # IMPORTANT: 创建总的RL环境配置类，继承于ManagerBasedRLEnvCfg类
 @configclass
 class CartpoleEnvCfg(ManagerBasedRLEnvCfg):
-    """Configuration for the locomotion velocity-tracking environment."""
+    """Configuration for the cartpole environment."""
 
     # Scene settings
     scene: CartpoleSceneCfg = CartpoleSceneCfg(num_envs=4096, env_spacing=4.0)
@@ -192,11 +170,8 @@ class CartpoleEnvCfg(ManagerBasedRLEnvCfg):
     actions: ActionsCfg = ActionsCfg()
     events: EventCfg = EventCfg()
     # MDP settings
-    curriculum: CurriculumCfg = CurriculumCfg()
     rewards: RewardsCfg = RewardsCfg()
     terminations: TerminationsCfg = TerminationsCfg()
-    # No command generator
-    commands: CommandsCfg = CommandsCfg()
 
     # Post initialization
     def __post_init__(self) -> None:

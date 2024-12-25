@@ -14,7 +14,6 @@ from typing import TYPE_CHECKING
 from omni.isaac.lab.assets import Articulation
 from omni.isaac.lab.managers import CommandTerm
 from omni.isaac.lab.markers import VisualizationMarkers
-from omni.isaac.lab.markers.config import GREEN_ARROW_X_MARKER_CFG
 from omni.isaac.lab.terrains import TerrainImporter
 from omni.isaac.lab.utils.math import quat_from_euler_xyz, quat_rotate_inverse, wrap_to_pi, yaw_quat
 
@@ -82,7 +81,9 @@ class UniformPose2dCommand(CommandTerm):
 
     def _update_metrics(self):
         # logs data
-        self.metrics["error_pos_2d"] = torch.norm(self.pos_command_w[:, :2] - self.robot.data.root_pos_w[:, :2], dim=1)
+        self.metrics["error_pos_2d"] = torch.norm(
+            self.pos_command_w[:, :2] - self.robot.data.root_link_pos_w[:, :2], dim=1
+        )
         self.metrics["error_heading"] = torch.abs(wrap_to_pi(self.heading_command_w - self.robot.data.heading_w))
 
     def _resample_command(self, env_ids: Sequence[int]):
@@ -96,7 +97,7 @@ class UniformPose2dCommand(CommandTerm):
 
         if self.cfg.simple_heading:
             # set heading command to point towards target
-            target_vec = self.pos_command_w[env_ids] - self.robot.data.root_pos_w[env_ids]
+            target_vec = self.pos_command_w[env_ids] - self.robot.data.root_link_pos_w[env_ids]
             target_direction = torch.atan2(target_vec[:, 1], target_vec[:, 0])
             flipped_target_direction = wrap_to_pi(target_direction + torch.pi)
 
@@ -117,27 +118,24 @@ class UniformPose2dCommand(CommandTerm):
 
     def _update_command(self):
         """Re-target the position command to the current root state."""
-        target_vec = self.pos_command_w - self.robot.data.root_pos_w[:, :3]
-        self.pos_command_b[:] = quat_rotate_inverse(yaw_quat(self.robot.data.root_quat_w), target_vec)
+        target_vec = self.pos_command_w - self.robot.data.root_link_pos_w[:, :3]
+        self.pos_command_b[:] = quat_rotate_inverse(yaw_quat(self.robot.data.root_link_quat_w), target_vec)
         self.heading_command_b[:] = wrap_to_pi(self.heading_command_w - self.robot.data.heading_w)
 
     def _set_debug_vis_impl(self, debug_vis: bool):
         # create markers if necessary for the first tome
         if debug_vis:
-            if not hasattr(self, "arrow_goal_visualizer"):
-                marker_cfg = GREEN_ARROW_X_MARKER_CFG.copy()
-                marker_cfg.markers["arrow"].scale = (0.2, 0.2, 0.8)
-                marker_cfg.prim_path = "/Visuals/Command/pose_goal"
-                self.arrow_goal_visualizer = VisualizationMarkers(marker_cfg)
+            if not hasattr(self, "goal_pose_visualizer"):
+                self.goal_pose_visualizer = VisualizationMarkers(self.cfg.goal_pose_visualizer_cfg)
             # set their visibility to true
-            self.arrow_goal_visualizer.set_visibility(True)
+            self.goal_pose_visualizer.set_visibility(True)
         else:
-            if hasattr(self, "arrow_goal_visualizer"):
-                self.arrow_goal_visualizer.set_visibility(False)
+            if hasattr(self, "goal_pose_visualizer"):
+                self.goal_pose_visualizer.set_visibility(False)
 
     def _debug_vis_callback(self, event):
         # update the box marker
-        self.arrow_goal_visualizer.visualize(
+        self.goal_pose_visualizer.visualize(
             translations=self.pos_command_w,
             orientations=quat_from_euler_xyz(
                 torch.zeros_like(self.heading_command_w),
@@ -186,7 +184,7 @@ class TerrainBasedPose2dCommand(UniformPose2dCommand):
 
         if self.cfg.simple_heading:
             # set heading command to point towards target
-            target_vec = self.pos_command_w[env_ids] - self.robot.data.root_pos_w[env_ids]
+            target_vec = self.pos_command_w[env_ids] - self.robot.data.root_link_pos_w[env_ids]
             target_direction = torch.atan2(target_vec[:, 1], target_vec[:, 0])
             flipped_target_direction = wrap_to_pi(target_direction + torch.pi)
 

@@ -167,10 +167,10 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
             # obtain quantities from simulation
             # get_jacobians()函数在官网文档中没有找到，但是可以分析其是4维的，第一维是环境数量，第二维是body frame（具体是哪个link的雅可比），第三、四维就是雅可比矩阵的维度
             jacobian = robot.root_physx_view.get_jacobians()[:, ee_jacobi_idx, :, robot_entity_cfg.joint_ids]
-            # IMPORTANT: body_state_w和root_state_w最后面的w代表世界坐标系
-            ee_pose_w = robot.data.body_state_w[:, robot_entity_cfg.body_ids[0], 0:7]
-            root_pose_w = robot.data.root_state_w[:, 0:7]
-            # body_state_w会返回在世界坐标系下某个body的位置和姿态，而root_state_w会返回在世界坐标系下根部的位置和姿态，两者计算可以算出末端在根部坐标系下的位置和姿态
+            # IMPORTANT: 最后面的w代表世界坐标系
+            ee_pose_w = robot.data.body_link_state_w[:, robot_entity_cfg.body_ids[0], 0:7]
+            root_pose_w = robot.data.root_link_state_w[:, 0:7]
+            # body_link_state_w会返回在世界坐标系下某个body的位置和姿态，而root_link_state_w会返回在世界坐标系下根部的位置和姿态，两者计算可以算出末端在根部坐标系下的位置和姿态
             joint_pos = robot.data.joint_pos[:, robot_entity_cfg.joint_ids]
             # compute frame in root frame
             ee_pos_b, ee_quat_b = subtract_frame_transforms(  # 这个函数就是用来计算末端在根部坐标系下的位置和姿态
@@ -192,7 +192,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         scene.update(sim_dt)
 
         # obtain quantities from simulation
-        ee_pose_w = robot.data.body_state_w[:, robot_entity_cfg.body_ids[0], 0:7]
+        ee_pose_w = robot.data.body_link_state_w[:, robot_entity_cfg.body_ids[0], 0:7]
         # update marker positions
         ee_marker.visualize(ee_pose_w[:, 0:3], ee_pose_w[:, 3:7])
         goal_marker.visualize(ik_commands[:, 0:3] + scene.env_origins, ik_commands[:, 3:7])
@@ -201,7 +201,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
 def main():
     """Main function."""
     # Load kit helper
-    sim_cfg = sim_utils.SimulationCfg(dt=0.01)
+    sim_cfg = sim_utils.SimulationCfg(dt=0.01, device=args_cli.device)
     sim = sim_utils.SimulationContext(sim_cfg)
     # Set main camera
     sim.set_camera_view([2.5, 2.5, 2.5], [0.0, 0.0, 0.0])

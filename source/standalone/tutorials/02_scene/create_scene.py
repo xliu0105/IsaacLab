@@ -8,7 +8,7 @@
 .. code-block:: bash
 
     # Usage
-    ./isaaclab.sh -p source/standalone/tutorials/03_scene/create_scene.py --num_envs 32
+    ./isaaclab.sh -p source/standalone/tutorials/02_scene/create_scene.py --num_envs 32
 
 """
 
@@ -93,8 +93,8 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
             # if this is not done, then the robots will be spawned at the (0, 0, 0) of the simulation world
             root_state = robot.data.default_root_state.clone()
             root_state[:, :3] += scene.env_origins
-            # NOTE: write_root_state_to_sim有两个参数，第一个是root_state，其shape是[len(env_ids),13]，第二个参数是env_ids，用于指定要写入环境的索引
-            robot.write_root_state_to_sim(root_state)
+            robot.write_root_link_pose_to_sim(root_state[:, :7])
+            robot.write_root_com_velocity_to_sim(root_state[:, 7:])
             # set joint positions with some noise
             joint_pos, joint_vel = robot.data.default_joint_pos.clone(), robot.data.default_joint_vel.clone()
             joint_pos += torch.rand_like(joint_pos) * 0.1
@@ -122,7 +122,7 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
 def main():
     """Main function."""
     # Load kit helper
-    sim_cfg = sim_utils.SimulationCfg(device="cpu", use_gpu_pipeline=False)
+    sim_cfg = sim_utils.SimulationCfg(device=args_cli.device)
     sim = SimulationContext(sim_cfg)
     # Set main camera
     sim.set_camera_view([2.5, 0.0, 4.0], [0.0, 0.0, 2.0])

@@ -95,10 +95,10 @@ class InHandReOrientationCommand(CommandTerm):
         # logs data
         # -- compute the orientation error
         self.metrics["orientation_error"] = math_utils.quat_error_magnitude(
-            self.object.data.root_quat_w, self.quat_command_w
+            self.object.data.root_link_quat_w, self.quat_command_w
         )
         # -- compute the position error
-        self.metrics["position_error"] = torch.norm(self.object.data.root_pos_w - self.pos_command_w, dim=1)
+        self.metrics["position_error"] = torch.norm(self.object.data.root_link_pos_w - self.pos_command_w, dim=1)
         # -- compute the number of consecutive successes
         successes = self.metrics["orientation_error"] < self.cfg.orientation_success_threshold
         self.metrics["consecutive_success"] += successes.float()
@@ -128,17 +128,17 @@ class InHandReOrientationCommand(CommandTerm):
         # note: parent only deals with callbacks. not their visibility
         if debug_vis:
             # create markers if necessary for the first time
-            if not hasattr(self, "goal_marker_visualizer"):
-                self.goal_marker_visualizer = VisualizationMarkers(self.cfg.visualizer_cfg)
+            if not hasattr(self, "goal_pose_visualizer"):
+                self.goal_pose_visualizer = VisualizationMarkers(self.cfg.goal_pose_visualizer_cfg)
             # set visibility
-            self.goal_marker_visualizer.set_visibility(True)
+            self.goal_pose_visualizer.set_visibility(True)
         else:
-            if hasattr(self, "goal_marker_visualizer"):
-                self.goal_marker_visualizer.set_visibility(False)
+            if hasattr(self, "goal_pose_visualizer"):
+                self.goal_pose_visualizer.set_visibility(False)
 
     def _debug_vis_callback(self, event):
         # add an offset to the marker position to visualize the goal
         marker_pos = self.pos_command_w + torch.tensor(self.cfg.marker_pos_offset, device=self.device)
         marker_quat = self.quat_command_w
         # visualize the goal marker
-        self.goal_marker_visualizer.visualize(translations=marker_pos, orientations=marker_quat)
+        self.goal_pose_visualizer.visualize(translations=marker_pos, orientations=marker_quat)

@@ -79,7 +79,7 @@ joint positions, current end-effector pose, and the Jacobian matrix.
 
 While the attribute :attr:`assets.ArticulationData.joint_pos` provides the joint positions,
 we only want the joint positions of the robot's arm, and not the gripper. Similarly, while
-the attribute :attr:`assets.ArticulationData.body_state_w` provides the state of all the
+the attribute :attr:`assets.ArticulationData.body_link_state_w` provides the state of all the
 robot's bodies, we only want the state of the robot's end-effector. Thus, we need to
 index into these arrays to obtain the desired quantities.
 
@@ -140,6 +140,7 @@ previous tutorials.
 The Code Execution
 ~~~~~~~~~~~~~~~~~~
 
+
 Now that we have gone through the code, let's run the script and see the result:
 
 .. code-block:: bash
@@ -150,5 +151,9 @@ The script will start a simulation with 128 robots. The robots will be controlle
 The current and desired end-effector poses should be displayed using frame markers. When the robot reaches
 the desired pose, the command should cycle through to the next pose specified in the script.
 
-To stop the simulation, you can either close the window, or press the ``STOP`` button in the UI, or
-press ``Ctrl+C`` in the terminal.
+.. figure:: ../../_static/tutorials/tutorial_task_space_controller.jpg
+    :align: center
+    :figwidth: 100%
+    :alt: result of run_diff_ik.py
+
+To stop the simulation, you can either close the window,  or press ``Ctrl+C`` in the terminal.

@@ -109,9 +109,9 @@ def run_simulator(sim: sim_utils.SimulationContext, entities: dict[str, RigidObj
                 radius=0.1, h_range=(0.25, 0.5), size=cone_object.num_instances, device=cone_object.device
             )
             # write root state to simulation
-            # 在isaac sim中，刚体对象有时需要更新其状态，如仿真的初始时刻，或者在仿真过程中，需要根据某些逻辑改变其状态
-            cone_object.write_root_state_to_sim(root_state)  # 将计算出来的root_state写入到模拟器中，覆盖掉原来的root_state，root_state是一个tensor
-            # 理论上，write_root_state_to_sim执行后会立即将更新后的状态写入仿真环境，使这些状态在下一个仿真步骤中生效
+              # 将计算出来的root_state写入到模拟器中，覆盖掉原来的root_state，root_state是一个tensor
+            cone_object.write_root_link_pose_to_sim(root_state[:, :7])
+            cone_object.write_root_com_velocity_to_sim(root_state[:, 7:])
             # reset buffers
             cone_object.reset()  # 重置所选环境的所有内置缓冲区，如果没有传入参数，将重置所有缓冲区
             print("----------------------------------------")
@@ -128,13 +128,13 @@ def run_simulator(sim: sim_utils.SimulationContext, entities: dict[str, RigidObj
         cone_object.update(sim_dt)  # 更新刚体对象内部缓冲区，以反映其在assets.RigidObject.data 属性中的新状态，应该是为了让刚体对象的状态和模拟器中的状态保持一致，又可能是去处理物理交互事件
         # print the root position
         if count % 50 == 0:
-            print(f"Root position (in world): {cone_object.data.root_state_w[:, :3]}")
+            print(f"Root position (in world): {cone_object.data.root_link_state_w[:, :3]}")
 
 
 def main():
     """Main function."""
     # Load kit helper
-    sim_cfg = sim_utils.SimulationCfg()
+    sim_cfg = sim_utils.SimulationCfg(device=args_cli.device)
     sim = SimulationContext(sim_cfg)
     # Set main camera
     sim.set_camera_view(eye=[1.5, 0.0, 1.0], target=[0.0, 0.0, 0.0])

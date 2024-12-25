@@ -20,8 +20,6 @@ import unittest
 
 import omni.usd
 
-from omni.isaac.lab.envs import ManagerBasedRLEnvCfg
-
 import omni.isaac.lab_tasks  # noqa: F401
 from omni.isaac.lab_tasks.utils import parse_env_cfg
 
@@ -46,7 +44,7 @@ class TestRecordVideoWrapper(unittest.TestCase):
     def setUp(self) -> None:
         # common parameters
         self.num_envs = 16
-        self.use_gpu = True
+        self.device = "cuda"
         # video parameters
         self.step_trigger = lambda step: step % 225 == 0
         self.video_length = 200
@@ -60,7 +58,7 @@ class TestRecordVideoWrapper(unittest.TestCase):
                 omni.usd.get_context().new_stage()
 
                 # parse configuration
-                env_cfg: ManagerBasedRLEnvCfg = parse_env_cfg(task_name, use_gpu=self.use_gpu, num_envs=self.num_envs)
+                env_cfg = parse_env_cfg(task_name, device=self.device, num_envs=self.num_envs)
 
                 # create environment
                 env = gym.make(task_name, cfg=env_cfg, render_mode="rgb_array")

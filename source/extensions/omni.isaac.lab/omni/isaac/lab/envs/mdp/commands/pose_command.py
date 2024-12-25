@@ -14,7 +14,6 @@ from typing import TYPE_CHECKING
 from omni.isaac.lab.assets import Articulation
 from omni.isaac.lab.managers import CommandTerm
 from omni.isaac.lab.markers import VisualizationMarkers
-from omni.isaac.lab.markers.config import FRAME_MARKER_CFG
 from omni.isaac.lab.utils.math import combine_frame_transforms, compute_pose_error, quat_from_euler_xyz, quat_unique
 
 if TYPE_CHECKING:
@@ -93,8 +92,8 @@ class UniformPoseCommand(CommandTerm):
     def _update_metrics(self):
         # transform command from base frame to simulation world frame
         self.pose_command_w[:, :3], self.pose_command_w[:, 3:] = combine_frame_transforms(
-            self.robot.data.root_pos_w,
-            self.robot.data.root_quat_w,
+            self.robot.data.root_link_pos_w,
+            self.robot.data.root_link_quat_w,
             self.pose_command_b[:, :3],
             self.pose_command_b[:, 3:],
         )
@@ -102,8 +101,8 @@ class UniformPoseCommand(CommandTerm):
         pos_error, rot_error = compute_pose_error(
             self.pose_command_w[:, :3],
             self.pose_command_w[:, 3:],
-            self.robot.data.body_state_w[:, self.body_idx, :3],
-            self.robot.data.body_state_w[:, self.body_idx, 3:7],
+            self.robot.data.body_link_state_w[:, self.body_idx, :3],
+            self.robot.data.body_link_state_w[:, self.body_idx, 3:7],
         )
         self.metrics["position_error"] = torch.norm(pos_error, dim=-1)
         self.metrics["orientation_error"] = torch.norm(rot_error, dim=-1)
@@ -131,21 +130,17 @@ class UniformPoseCommand(CommandTerm):
         # create markers if necessary for the first tome
         if debug_vis:
             if not hasattr(self, "goal_pose_visualizer"):
-                marker_cfg = FRAME_MARKER_CFG.copy()
-                marker_cfg.markers["frame"].scale = (0.1, 0.1, 0.1)
                 # -- goal pose
-                marker_cfg.prim_path = "/Visuals/Command/goal_pose"
-                self.goal_pose_visualizer = VisualizationMarkers(marker_cfg)
+                self.goal_pose_visualizer = VisualizationMarkers(self.cfg.goal_pose_visualizer_cfg)
                 # -- current body pose
-                marker_cfg.prim_path = "/Visuals/Command/body_pose"
-                self.body_pose_visualizer = VisualizationMarkers(marker_cfg)
+                self.current_pose_visualizer = VisualizationMarkers(self.cfg.current_pose_visualizer_cfg)
             # set their visibility to true
             self.goal_pose_visualizer.set_visibility(True)
-            self.body_pose_visualizer.set_visibility(True)
+            self.current_pose_visualizer.set_visibility(True)
         else:
             if hasattr(self, "goal_pose_visualizer"):
                 self.goal_pose_visualizer.set_visibility(False)
-                self.body_pose_visualizer.set_visibility(False)
+                self.current_pose_visualizer.set_visibility(False)
 
     def _debug_vis_callback(self, event):
         # check if robot is initialized
@@ -156,5 +151,5 @@ class UniformPoseCommand(CommandTerm):
         # -- goal pose
         self.goal_pose_visualizer.visualize(self.pose_command_w[:, :3], self.pose_command_w[:, 3:])
         # -- current body pose
-        body_pose_w = self.robot.data.body_state_w[:, self.body_idx]
-        self.body_pose_visualizer.visualize(body_pose_w[:, :3], body_pose_w[:, 3:7])
+        body_link_state_w = self.robot.data.body_link_state_w[:, self.body_idx]
+        self.current_pose_visualizer.visualize(body_link_state_w[:, :3], body_link_state_w[:, 3:7])

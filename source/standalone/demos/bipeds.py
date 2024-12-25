@@ -47,27 +47,27 @@ from omni.isaac.lab_assets import G1_CFG  # isort:skip
 
 def main():
     """Main function."""
-
     # Load kit helper
-    sim = SimulationContext(
-        sim_utils.SimulationCfg(device="cpu", use_gpu_pipeline=False, dt=0.01, physx=sim_utils.PhysxCfg(use_gpu=False))
-    )
+    sim_cfg = sim_utils.SimulationCfg(dt=0.005, device=args_cli.device)
+    sim = SimulationContext(sim_cfg)
     # Set main camera
-    sim.set_camera_view(eye=[3.5, 3.5, 3.5], target=[0.0, 0.0, 0.0])
+    sim.set_camera_view(eye=[3.0, 0.0, 2.25], target=[0.0, 0.0, 1.0])
 
     # Spawn things into stage
     # Ground-plane
     cfg = sim_utils.GroundPlaneCfg()
     cfg.func("/World/defaultGroundPlane", cfg)
     # Lights
-    cfg = sim_utils.DistantLightCfg(intensity=3000.0, color=(0.75, 0.75, 0.75))
+    cfg = sim_utils.DomeLightCfg(intensity=2000.0, color=(0.75, 0.75, 0.75))
     cfg.func("/World/Light", cfg)
 
+    # Define origins
     origins = torch.tensor([
+        [0.0, -1.0, 0.0],
         [0.0, 0.0, 0.0],
         [0.0, 1.0, 0.0],
-        [0.0, 2.0, 0.0],
-    ])
+    ]).to(device=sim.device)
+
     # Robots
     cassie = Articulation(CASSIE_CFG.replace(prim_path="/World/Cassie"))
     h1 = Articulation(H1_CFG.replace(prim_path="/World/H1"))
@@ -97,7 +97,8 @@ def main():
                 robot.write_joint_state_to_sim(joint_pos, joint_vel)
                 root_state = robot.data.default_root_state.clone()
                 root_state[:, :3] += origins[index]
-                robot.write_root_state_to_sim(root_state)
+                robot.write_root_link_pose_to_sim(root_state[:, :7])
+                robot.write_root_com_velocity_to_sim(root_state[:, 7:])
                 robot.reset()
             # reset command
             print(">>>>>>>> Reset!")
