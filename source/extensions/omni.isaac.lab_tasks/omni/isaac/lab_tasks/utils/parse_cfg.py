@@ -117,6 +117,7 @@ def parse_env_cfg(
             environment configuration.
     """
     # load the default configuration
+    # 从注册表中加载名为env_cfg_entry_point的配置
     cfg = load_cfg_from_registry(task_name, "env_cfg_entry_point")
 
     # check that it is not a dict

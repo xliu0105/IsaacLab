@@ -143,7 +143,9 @@ class AppLauncher:
 
     @staticmethod
     def add_app_launcher_args(parser: argparse.ArgumentParser) -> None:
-        """Utility function to configure AppLauncher arguments with an existing argument parser object.
+        """
+        这个函数是用来在argparse.ArgumentParser对象中添加AppLauncher特定的参数的，以便可以通过命令行传入参数来配置AppLauncher。
+        Utility function to configure AppLauncher arguments with an existing argument parser object.
 
         This function takes an ``argparse.ArgumentParser`` object and does some sanity checking on the existing
         arguments for ingestion by the SimulationApp. It then appends custom command-line arguments relevant
